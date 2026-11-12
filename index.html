@@ -95,19 +95,6 @@
     overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
   }
 
-  .hint {
-    position: absolute;
-    left: 50%;
-    bottom: 18px;
-    transform: translateX(-50%);
-    margin: 0;
-    font-size: 13px;
-    opacity: .62;
-    white-space: nowrap;
-    pointer-events: none;
-    transition: opacity .6s ease;
-  }
-  .hint.gone { opacity: 0; }
 
   .music {
     position: absolute;
@@ -128,7 +115,6 @@
   .music:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
 
   @media (max-width: 560px) {
-    .hint { bottom: 52px; font-size: 12px; }
     .music { right: 50%; transform: translateX(50%); bottom: 12px; }
   }
 
@@ -212,7 +198,6 @@
 
   @media (prefers-reduced-motion: reduce) {
     .prize { animation: none; }
-    .hint { transition: none; }
   }
 </style>
 <script type="importmap">
@@ -236,19 +221,18 @@
 
   <main>
     <div id="stage"></div>
-    <p class="sr-only" id="game-help">Eendjes vissen. Beweeg de hengel met de muis, je vinger of de pijltjestoetsen naar een ringetje en klik, tik of druk op Enter om een eendje te vangen. Gele eendjes zijn Mail, roze eendjes Instagram en oranje eendjes LinkedIn.</p>
-    <p class="hint" id="hint" aria-hidden="true">Breng het haakje bij een ringetje en klik</p>
+    <p class="sr-only" id="game-help">Eendjes vissen. Beweeg de hengel met de muis, je vinger of de pijltjestoetsen en haal het haakje door het ringetje op de kop van een eendje om het te vangen. Het gele eendje is Dream School, het blauwe Knockout Champs en het roze TV Academy.</p>
     <button class="music" id="music" type="button" aria-pressed="false">♪ muziek uit</button>
 
     <div class="prize" id="prize" role="dialog" aria-labelledby="prize-title" hidden>
       <div class="prize-top">
         <p class="won">Gewonnen</p>
         <div class="icon" id="prize-icon" aria-hidden="true"></div>
-        <h2 id="prize-title">Mail</h2>
-        <p class="sub" id="prize-sub">mail@rinaldopor.nl</p>
+        <h2 id="prize-title">TV Academy</h2>
+        <p class="sub" id="prize-sub">tvacademy.nl</p>
       </div>
       <div class="prize-bottom">
-        <a class="go" id="prize-go" href="mailto:mail@rinaldopor.nl">Stuur een mail</a>
+        <a class="go" id="prize-go" href="https://tvacademy.nl/" target="_blank" rel="noopener">Naar TV Academy</a>
         <button class="back" id="prize-close" type="button">Terug in het water</button>
       </div>
     </div>
@@ -263,31 +247,27 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
    Instellingen
    ================================================================ */
 const PRIZES = {
-  mail: {
-    color: 0xeaff1f, beak: 0xff7a00, css: '#eaff1f',
-    title: 'Mail', sub: 'mail@rinaldopor.nl', cta: 'Stuur een mail',
-    href: 'mailto:mail@rinaldopor.nl', blank: false,
+  dreamschool: {
+    color: 0xf4ff1c, beak: 0xff7a00, css: '#f4ff1c',
+    title: 'Dream School', sub: 'Seizoen 7', label: ['Dream', 'School'], cta: 'Kijk op NPO Start',
+    href: 'https://npo.nl/start/serie/dream-school/afleveringen/seizoen-7',
   },
-  instagram: {
+  knockout: {
+    color: 0x5cf2ff, beak: 0xff7a00, css: '#5cf2ff',
+    title: 'Knockout Champs', sub: 'Seizoen 1', label: ['Knockout', 'Champs'], cta: 'Kijk op NPO Start',
+    href: 'https://npo.nl/start/serie/knockout-champs/afleveringen/seizoen-1',
+  },
+  tvacademy: {
     color: 0xff2d9e, beak: 0xffd23a, css: '#ff2d9e',
-    title: 'Instagram', sub: '@rinaldopor', cta: 'Open Instagram',
-    href: 'https://www.instagram.com/rinaldopor/', blank: true,
-  },
-  linkedin: {
-    color: 0xff6a00, beak: 0xffd23a, css: '#ff6a00',
-    title: 'LinkedIn', sub: 'Rinaldo Por', cta: 'Open LinkedIn',
-    href: 'https://www.linkedin.com/in/rinaldo-por-93022511a/', blank: true,
+    title: 'TV Academy', sub: 'tvacademy.nl', label: ['TV', 'Academy'], cta: 'Naar TV Academy',
+    href: 'https://tvacademy.nl/',
   },
 };
-const ICONS = {
-  mail: '<svg viewBox="0 0 24 24" fill="none" stroke="#2c2f33" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3.5 7l8.5 6.5L20.5 7"/></svg>',
-  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="#2c2f33" stroke-width="1.8"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1" fill="#2c2f33" stroke="none"/></svg>',
-  linkedin: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="3" fill="#2c2f33"/><rect x="6.6" y="10" width="2.4" height="7.5" fill="#fff"/><circle cx="7.8" cy="7.2" r="1.45" fill="#fff"/><path d="M11 10h2.3v1.1c.5-.8 1.4-1.3 2.6-1.3 2 0 2.9 1.2 2.9 3.4v4.3h-2.4v-3.9c0-1.1-.4-1.7-1.3-1.7-1 0-1.6.7-1.6 1.8v3.8H11z" fill="#fff"/></svg>',
-};
+const TV_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="#2c2f33" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="7" width="18" height="12.5" rx="2.5"/><path d="M8.5 3l3.5 4 3.5-4"/></svg>';
 
-const DUCK_COUNT = 25;
-const W = 5.0, D = 3.4;            // binnenmaat bak (halve breedte / diepte)
-const BX = 2.4, BZ = 1.0;          // blok in het midden (half)
+const DUCK_COUNT = 3;
+const W = 9.0, D = 7.0;            // binnenmaat bak (halve breedte / diepte)
+const BX = 3.0, BZ = 1.5;          // blok in het midden (half)
 const FLOOR = -0.6, RIM = 0.45, BLOCK_TOP = 0.5, BASE = -1.0;
 const CX = (W + BX) / 2, CZ = (D + BZ) / 2;   // middellijn van de rondgang
 const DUCK_R = 0.33;
@@ -295,9 +275,11 @@ const FLOAT_Y = 0.07;
 const RING_LOCAL = new THREE.Vector3(0, 0.629, 0.14);
 const RING_TOP_LOCAL = new THREE.Vector3(0, 0.70, 0.14);
 const HOOK_BEND = new THREE.Vector3(0.05, -0.165, 0);   // binnenkant van de bocht, t.o.v. bovenkant haakje
-const ROPE_N = 14, ROPE_LEN = 1.55, SEG = ROPE_LEN / (ROPE_N - 1);
+const HOOK_TIP = new THREE.Vector3(0.081, -0.081, 0);   // punt van het haakje
+const RING_R = 0.075;
+const ROPE_N = 12, ROPE_LEN = 0.85, SEG = ROPE_LEN / (ROPE_N - 1);
 const HOOK_Y = FLOAT_Y + RING_LOCAL.y;                 // hoogte waarop het haakje "wijst"
-const TIP_Y = HOOK_Y + 0.17 + ROPE_LEN + 0.02;
+const TIP_Y = HOOK_Y + 0.17 + ROPE_LEN - 0.05;
 const SUN_DIR = new THREE.Vector3(0.42, 0.86, 0.3).normalize();
 
 const coarse = matchMedia('(pointer: coarse)').matches;
@@ -306,8 +288,6 @@ let reduced = reduceMQ.matches;
 reduceMQ.addEventListener?.('change', e => { reduced = e.matches; });
 
 const stage = document.getElementById('stage');
-const hintEl = document.getElementById('hint');
-if (coarse) hintEl.textContent = 'Tik bij een ringetje om een eendje te vangen';
 
 /* ================================================================
    Renderer, scène, camera
@@ -317,7 +297,6 @@ try {
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' });
 } catch (err) {
   stage.innerHTML = '<div class="fallback">Je browser kan dit spelletje niet tonen. De links staan hierboven.</div>';
-  hintEl.remove();
   document.getElementById('music').remove();
   throw err;
 }
@@ -683,29 +662,19 @@ const beakIM = makeIM(DG.beakGeo, beakMat);
 const eyeIM = makeIM(DG.eyeGeo, eyeMat);
 const ringIM = makeIM(DG.ringGeo, ringMat);
 
-// kleuren evenredig verdeeld en geschud
-const types = [];
-for (let i = 0; i < DUCK_COUNT; i++) types.push(['mail', 'instagram', 'linkedin'][i % 3]);
-for (let i = types.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [types[i], types[j]] = [types[j], types[i]]; }
-
 const RING_COLOR = new THREE.Color(0xdcdcdc), RING_HOT = new THREE.Color(0xffd84a);
 const ducks = [];
-for (let i = 0; i < DUCK_COUNT; i++) {
-  const th = (i / DUCK_COUNT) * Math.PI * 2 + (Math.random() - 0.5) * 0.08;
-  const c = Math.cos(th), s = Math.sin(th);
-  const lane = (i % 2 ? 1 : -1) * (0.38 + Math.random() * 0.15);
-  const x = Math.sign(c) * Math.pow(Math.abs(c), 0.5) * (CX + lane * 0.9);
-  const z = Math.sign(s) * Math.pow(Math.abs(s), 0.5) * (CZ + lane * 0.9);
-  const type = types[i];
+Object.keys(PRIZES).forEach((type, i) => {
   ducks.push({
-    i, type, x, z, vx: 0, vz: 0, yaw: Math.random() * 6.28, roll: 0, rollV: 0, pitchW: 0, pitchV: 0,
-    phase: Math.random() * 10, sp: 0.8 + Math.random() * 0.45, wake: Math.random() * 2, bumpCd: 0,
-    state: 'float', pos: new THREE.Vector3(x, FLOAT_Y, z), q: new THREE.Quaternion(),
+    i, type, x: 0, z: 0, vx: 0, vz: 0, yaw: Math.random() * 6.28, roll: 0, rollV: 0, pitchW: 0, pitchV: 0,
+    phase: Math.random() * 10, sp: 0.85 + i * 0.12, wake: Math.random() * 2, bumpCd: 0,
+    state: 'float', pos: new THREE.Vector3(0, FLOAT_Y, 0), q: new THREE.Quaternion(),
+    prev: [null, null],
   });
   bodyIM.setColorAt(i, new THREE.Color(PRIZES[type].color));
   beakIM.setColorAt(i, new THREE.Color(PRIZES[type].beak));
   ringIM.setColorAt(i, RING_COLOR);
-}
+});
 
 /* label onder op het eendje (zie je als het omdraait) */
 const labelTex = {};
@@ -715,34 +684,26 @@ function drawLabel(key) {
   const g = c.getContext('2d');
   g.fillStyle = '#fff'; g.beginPath(); g.arc(128, 128, 126, 0, Math.PI * 2); g.fill();
   g.lineWidth = 12; g.strokeStyle = p.css; g.beginPath(); g.arc(128, 128, 112, 0, Math.PI * 2); g.stroke();
-  g.strokeStyle = g.fillStyle = '#2c2f33'; g.lineWidth = 8; g.lineJoin = g.lineCap = 'round';
-  const cx = 128, cy = 98;
-  if (key === 'mail') {
-    g.strokeRect(cx - 38, cy - 26, 76, 52);
-    g.beginPath(); g.moveTo(cx - 34, cy - 20); g.lineTo(cx, cy + 6); g.lineTo(cx + 34, cy - 20); g.stroke();
-  } else if (key === 'instagram') {
-    g.beginPath(); g.roundRect(cx - 32, cy - 32, 64, 64, 18); g.stroke();
-    g.beginPath(); g.arc(cx, cy, 14, 0, Math.PI * 2); g.stroke();
-    g.beginPath(); g.arc(cx + 19, cy - 19, 4.5, 0, Math.PI * 2); g.fill();
-  } else {
-    g.beginPath(); g.roundRect(cx - 32, cy - 32, 64, 64, 9); g.fill();
-    g.fillStyle = '#fff'; g.font = '600 40px "Instrument Sans", system-ui, sans-serif';
-    g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('in', cx + 1, cy + 3);
-    g.fillStyle = '#2c2f33';
-  }
-  g.font = '500 36px "Instrument Sans", system-ui, sans-serif';
+  g.strokeStyle = g.fillStyle = '#2c2f33'; g.lineWidth = 7; g.lineJoin = g.lineCap = 'round';
+  // tv'tje
+  g.beginPath(); g.roundRect(100, 62, 56, 38, 8); g.stroke();
+  g.beginPath(); g.moveTo(116, 48); g.lineTo(128, 61); g.lineTo(140, 48); g.stroke();
   g.textAlign = 'center'; g.textBaseline = 'middle';
-  g.fillText(p.title, 128, 172);
+  g.font = '500 32px "Instrument Sans", system-ui, sans-serif';
+  g.fillText(p.label[0], 128, 132);
+  g.fillText(p.label[1], 128, 164);
+  g.globalAlpha = 0.6; g.font = '400 20px "Instrument Sans", system-ui, sans-serif';
+  g.fillText(p.sub, 128, 196);
   const t = labelTex[key] || new THREE.CanvasTexture(c);
   t.image = c; t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; t.needsUpdate = true;
   labelTex[key] = t;
 }
-['mail', 'instagram', 'linkedin'].forEach(drawLabel);
-document.fonts?.load('500 36px "Instrument Sans"').then(() => ['mail', 'instagram', 'linkedin'].forEach(drawLabel)).catch(() => {});
+Object.keys(PRIZES).forEach(drawLabel);
+document.fonts?.load('500 32px "Instrument Sans"').then(() => Object.keys(PRIZES).forEach(drawLabel)).catch(() => {});
 
 const labelMesh = new THREE.Mesh(
   new THREE.CircleGeometry(0.15, 48).rotateX(Math.PI / 2).translate(0, -0.163, 0),
-  new THREE.MeshStandardMaterial({ map: labelTex.mail, roughness: 0.45 })
+  new THREE.MeshStandardMaterial({ map: labelTex.dreamschool, roughness: 0.45 })
 );
 labelMesh.matrixAutoUpdate = false;
 labelMesh.visible = false;
@@ -958,6 +919,10 @@ musicBtn.addEventListener('click', () => {
    Camera passend maken; bak kantelen op een staand scherm
    ================================================================ */
 const toTankQ = new THREE.Quaternion();
+const raycaster = new THREE.Raycaster();
+const ndc = new THREE.Vector2();
+const region = { pts: [], edges: [], c: new THREE.Vector2(), ex: 1, ez: 1 };
+let camDist = 10, placedDucks = false;
 const camLocal = new THREE.Vector3();
 let portrait = false;
 function fit() {
@@ -974,28 +939,72 @@ function fit() {
   U.toTank.value.copy(tank.matrixWorld).invert();
   water.material.uniforms.uNM.value.setFromMatrix4(tank.matrixWorld);
 
-  camera.fov = portrait ? 38 : 30;
+  // schuin (45°) en dicht op het water van de voorste rondgang
+  camera.fov = portrait ? 46 : 36;
   camera.updateProjectionMatrix();
-  const elev = THREE.MathUtils.degToRad(portrait ? 60 : 54);
+  const elev = THREE.MathUtils.degToRad(45);
   const dir = new THREE.Vector3(0, Math.sin(elev), Math.cos(elev));
-  const look = new THREE.Vector3(0, portrait ? -0.2 : -0.3, portrait ? 0.15 : 0.25);
-  const pts = [];
-  for (const sx of [-1, 1]) for (const sz of [-1, 1]) for (const y of [BASE, RIM]) {
-    pts.push(new THREE.Vector3(sx * (W + 0.42), y, sz * (D + 0.42)).applyMatrix4(tank.matrixWorld));
-  }
-  const tmp = new THREE.Vector3();
-  let lo = 2, hi = 80;
-  for (let k = 0; k < 32; k++) {
-    const mid = (lo + hi) / 2;
-    camera.position.copy(look).addScaledVector(dir, mid);
+  const look = new THREE.Vector3(0, 0, (D + BZ) / 2).applyMatrix4(tank.matrixWorld);
+  const water0 = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
+  const hit = new THREE.Vector3();
+  const place = dist => {
+    camera.position.copy(look).addScaledVector(dir, dist);
     camera.lookAt(look); camera.updateMatrixWorld();
-    let mx = 0, my = 0;
-    for (const p of pts) { tmp.copy(p).project(camera); mx = Math.max(mx, Math.abs(tmp.x)); my = Math.max(my, Math.abs(tmp.y)); }
-    if (Math.max(mx / 0.95, my / (portrait ? 0.8 : 0.88)) > 1) lo = mid; else hi = mid;
+  };
+  const groundAt = (nx, ny, plane, out) => {
+    raycaster.setFromCamera(ndc.set(nx, ny), camera);
+    if (!raycaster.ray.intersectPlane(plane, out)) return null;
+    return tank.worldToLocal(out);
+  };
+  // 1) zo ver mogelijk weg zonder dat de rand of het blok in beeld komt
+  let lo = 1, hi = 40;
+  for (let k = 0; k < 30; k++) {
+    const mid = (lo + hi) / 2; place(mid);
+    let ok = true;
+    for (const [nx, ny] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) {
+      const p = groundAt(nx, ny, water0, hit);
+      if (!p || Math.abs(p.x) > W - 0.05 || p.z < BZ + 0.05 || p.z > D - 0.05) { ok = false; break; }
+    }
+    if (ok) lo = mid; else hi = mid;
   }
-  camera.position.copy(look).addScaledVector(dir, hi);
-  camera.lookAt(look); camera.updateMatrixWorld();
+  // 2) maar niet verder dan nodig: de eendjes moeten groot in beeld zijn
+  const hfov = 2 * Math.atan(Math.tan(THREE.MathUtils.degToRad(camera.fov) / 2) * camera.aspect);
+  const want = (portrait ? 3.1 : 5.2) / (2 * Math.tan(hfov / 2));
+  camDist = Math.min(lo, want);
+  place(camDist);
   camLocal.copy(camera.position); tank.worldToLocal(camLocal);
+
+  // gebied waarbinnen de eendjes blijven (zichtbaar deel van het water)
+  const fl = new THREE.Plane(new THREE.Vector3(0, 1, 0), -FLOAT_Y);
+  const top = portrait ? 0.5 : 0.45, side = portrait ? 0.78 : 0.84, bottom = portrait ? -0.72 : -0.78;
+  region.pts = [[-side, bottom], [side, bottom], [side, top], [-side, top]].map(([nx, ny]) => {
+    const p = groundAt(nx, ny, fl, new THREE.Vector3()) || new THREE.Vector3();
+    return new THREE.Vector2(p.x, p.z);
+  });
+  region.c.set(0, 0); region.pts.forEach(p => region.c.add(p)); region.c.multiplyScalar(0.25);
+  let minx = Infinity, maxx = -Infinity, minz = Infinity, maxz = -Infinity;
+  region.pts.forEach(p => { minx = Math.min(minx, p.x); maxx = Math.max(maxx, p.x); minz = Math.min(minz, p.y); maxz = Math.max(maxz, p.y); });
+  region.ex = (maxx - minx) / 2; region.ez = (maxz - minz) / 2;
+  region.edges = region.pts.map((a, i) => {
+    const b = region.pts[(i + 1) % 4];
+    const n = new THREE.Vector2(-(b.y - a.y), b.x - a.x).normalize();
+    if (n.dot(region.c.clone().sub(a)) < 0) n.negate();
+    return { a, n };
+  });
+  if (!placedDucks) {
+    placedDucks = true;
+    ducks.forEach((d, i) => {
+      const ang = i / DUCK_COUNT * Math.PI * 2 + 0.4;
+      d.x = region.c.x + Math.cos(ang) * region.ex * 0.45;
+      d.z = region.c.y + Math.sin(ang) * region.ez * 0.45;
+    });
+  }
+  // zon + schaduw rond het zichtbare stuk
+  sunLight.target.position.copy(look);
+  sunLight.position.copy(look).addScaledVector(SUN_DIR, 16);
+  sunLight.target.updateMatrixWorld();
+  Object.assign(sunLight.shadow.camera, { left: -7, right: 7, top: 7, bottom: -7 });
+  sunLight.shadow.camera.updateProjectionMatrix();
 }
 new ResizeObserver(fit).observe(stage);
 fit();
@@ -1003,10 +1012,8 @@ fit();
 /* ================================================================
    Invoer: muis, touch, toetsenbord
    ================================================================ */
-const raycaster = new THREE.Raycaster();
 const aimPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), -HOOK_Y);
-const ndc = new THREE.Vector2();
-let catchUntil = -1, hasAimed = false;
+let hasAimed = false;
 function aimAt(clientX, clientY) {
   const r = canvas.getBoundingClientRect();
   ndc.set(((clientX - r.left) / r.width) * 2 - 1, -((clientY - r.top) / r.height) * 2 + 1);
@@ -1034,24 +1041,17 @@ canvas.addEventListener('pointerdown', e => {
     try { canvas.setPointerCapture(e.pointerId); } catch {}
   } else {
     aimAt(e.clientX, e.clientY);
-    catchUntil = time + 0.35;
   }
 });
 function touchEnd(e) {
   if (e.pointerType !== 'touch' || !touchDown) return;
   touchDown = false;
-  if (phase === 'idle') catchUntil = time + 1.3;
 }
 canvas.addEventListener('pointerup', touchEnd);
 canvas.addEventListener('pointercancel', e => { touchDown = false; });
 canvas.addEventListener('keydown', e => {
   const step = e.shiftKey ? 0.8 : 0.3;
   const k = e.key;
-  if (k === 'Enter' || k === ' ') {
-    e.preventDefault(); audio();
-    if (phase === 'idle') catchUntil = time + 0.8;
-    return;
-  }
   // pijltjes in schermrichting, omgezet naar de (mogelijk gedraaide) bak
   const m = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[k];
   if (!m || phase !== 'idle') return;
@@ -1082,17 +1082,33 @@ function ringWorld(d, out) { return out.copy(RING_LOCAL).applyQuaternion(d.q).ad
 const _v = new THREE.Vector3(), _v2 = new THREE.Vector3(), _q = new THREE.Quaternion(), _q2 = new THREE.Quaternion();
 const Y = new THREE.Vector3(0, 1, 0);
 
-function findHover() {
-  const lim = coarse ? 0.5 : 0.34;
-  let best = null, bd = lim * lim;
+// Is de punt (of de bocht) van het haakje door de opening van een ringetje gegaan?
+// We rekenen in het assenstelsel van de ring: z = afstand tot het vlak van de ring,
+// x/y = positie in dat vlak. Een tekenwissel van z binnen de straal (+ marge) = erdoor.
+const HOOK_PTS = [HOOK_BEND, HOOK_TIP];
+const _hp = new THREE.Vector3(), _inv = new THREE.Quaternion();
+function checkThread() {
+  const margin = coarse ? 0.14 : 0.1;   // ruime marge, ook te doen op een telefoon
+  let near = null, nearScore = Infinity, threaded = null;
   for (const d of ducks) {
-    if (d.state !== 'float') continue;
-    ringWorld(d, _v);
-    const dx = _v.x - hookBendPos.x, dy = (_v.y - hookBendPos.y) * 0.5, dz = _v.z - hookBendPos.z;
-    const dd = dx * dx + dy * dy + dz * dz;
-    if (dd < bd) { bd = dd; best = d; }
+    if (d.state !== 'float') { d.prev[0] = d.prev[1] = null; continue; }
+    _inv.copy(d.q).invert();
+    for (let k = 0; k < 2; k++) {
+      _hp.copy(HOOK_PTS[k]).applyQuaternion(hookQ).add(rope[ROPE_N - 1].p)
+        .sub(d.pos).applyQuaternion(_inv).sub(RING_LOCAL);
+      const pr = d.prev[k];
+      if (pr && hasAimed && !threaded && Math.sign(pr.z) !== Math.sign(_hp.z) && Math.abs(pr.z - _hp.z) < 0.5) {
+        const t = pr.z / (pr.z - _hp.z);
+        const x = pr.x + (_hp.x - pr.x) * t, y = pr.y + (_hp.y - pr.y) * t;
+        if (Math.hypot(x, y) < RING_R + margin) threaded = d;
+      }
+      d.prev[k] = d.prev[k] ? d.prev[k].copy(_hp) : _hp.clone();
+      const score = Math.hypot(_hp.x, _hp.y, _hp.z * 0.7);
+      if (score < nearScore) { nearScore = score; near = d; }
+    }
   }
-  return best;
+  hoverDuck = nearScore < RING_R + margin + 0.12 ? near : null;
+  return threaded;
 }
 
 function hookDuck(d) {
@@ -1104,14 +1120,12 @@ function hookDuck(d) {
   // showplek: het eendje hangt in het bovenste deel van het beeld, boven het kaartje
   // (dichter bij de camera dan de bak, zodat het goed te zien is)
   raycaster.setFromCamera(ndc.set(0, portrait ? 0.42 : 0.36), camera);
-  const hit = raycaster.ray.at(camera.position.length() * (portrait ? 0.5 : 0.56), new THREE.Vector3());
+  const hit = raycaster.ray.at(camDist * (portrait ? 0.7 : 0.74), new THREE.Vector3());
   tank.worldToLocal(hit);
   showTip.set(hit.x, hit.y + RING_TOP_LOCAL.y - HOOK_BEND.y + ROPE_LEN, hit.z);
   plons(1);
   addRipple(d.pos.x, d.pos.z, 0.05);
   splash(d.pos.x, 0.02, d.pos.z, 10, 0.6);
-  catchUntil = -1;
-  hintEl.classList.add('gone');
   caughtOnce = true;
   labelMesh.material.map = labelTex[d.type];
   labelMesh.material.needsUpdate = true;
@@ -1131,13 +1145,12 @@ let lastFocus = null;
 function openPrize(type) {
   const p = PRIZES[type];
   prizeEl.style.setProperty('--duck', p.css);
-  document.getElementById('prize-icon').innerHTML = ICONS[type];
+  document.getElementById('prize-icon').innerHTML = TV_ICON;
   document.getElementById('prize-title').textContent = p.title;
   document.getElementById('prize-sub').textContent = p.sub;
   prizeGo.textContent = p.cta;
   prizeGo.href = p.href;
-  if (p.blank) { prizeGo.target = '_blank'; prizeGo.rel = 'noopener'; }
-  else { prizeGo.removeAttribute('target'); prizeGo.removeAttribute('rel'); }
+  prizeGo.target = '_blank'; prizeGo.rel = 'noopener';
   lastFocus = document.activeElement;
   prizeEl.hidden = false;
   prizeGo.focus({ preventScroll: true });
@@ -1152,12 +1165,8 @@ prizeClose.addEventListener('click', closePrize);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closePrize(); });
 
 function nearestChannel(x, z, out) {
-  const m = DUCK_R + 0.05;
-  x = THREE.MathUtils.clamp(x, -W + m, W - m);
-  z = THREE.MathUtils.clamp(z, -D + m, D - m);
-  if (Math.abs(x) < BX + m && Math.abs(z) < BZ + m) {
-    const px = BX + m - Math.abs(x), pz = BZ + m - Math.abs(z);
-    if (px < pz) x = Math.sign(x || 1) * (BX + m); else z = Math.sign(z || 1) * (BZ + m);
+  for (let i = 0; i < 40 && !insideRegion(x, z, DUCK_R + 0.05); i++) {
+    x += (region.c.x - x) * 0.1; z += (region.c.y - z) * 0.1;
   }
   return out.set(x, FLOAT_Y, z);
 }
@@ -1178,13 +1187,18 @@ function startReturn() {
    ================================================================ */
 const flow = { tx: 0, tz: 0, nx: 0, nz: 0, f: 1 };
 function flowAt(x, z) {
-  const n = 4, ax = x / CX, az = z / CZ;
-  const f = Math.pow(Math.pow(Math.abs(ax), n) + Math.pow(Math.abs(az), n), 1 / n);
-  let gx = Math.sign(x) * Math.pow(Math.abs(ax), n - 1) / CX;
-  let gz = Math.sign(z) * Math.pow(Math.abs(az), n - 1) / CZ;
-  const gl = Math.hypot(gx, gz) || 1; gx /= gl; gz /= gl;
-  flow.tx = -gz; flow.tz = gx; flow.nx = gx; flow.nz = gz; flow.f = f;
+  const rx = (x - region.c.x) / region.ex, rz = (z - region.c.y) / region.ez;
+  let tx = -rz / region.ez, tz = rx / region.ex;
+  const tl = Math.hypot(tx, tz) || 1;
+  const rr = Math.hypot(rx, rz) || 1e-6;
+  flow.tx = tx / tl; flow.tz = tz / tl;
+  flow.nx = rx / rr; flow.nz = rz / rr;
+  flow.f = rr / 0.5;            // 1 = voorkeursbaan op halve afstand van de rand
   return flow;
+}
+function insideRegion(x, z, m) {
+  for (const { a, n } of region.edges) if ((x - a.x) * n.x + (z - a.y) * n.y < m) return false;
+  return true;
 }
 
 function bump(d, strength) {
@@ -1194,12 +1208,12 @@ function bump(d, strength) {
 }
 
 function updateDucks(dt) {
-  const speed = reduced ? 0.1 : 0.3;
+  const speed = reduced ? 0.06 : 0.17;
   const floats = ducks.filter(d => d.state === 'float');
   for (const d of floats) {
     flowAt(d.x, d.z);
-    const centre = THREE.MathUtils.clamp((1 - flow.f) * 0.5, -0.12, 0.12);
-    const wander = (Math.sin(time * 0.37 + d.phase) + Math.sin(time * 0.61 + d.phase * 1.7)) * 0.07;
+    const centre = THREE.MathUtils.clamp((1 - flow.f) * 0.25, -0.08, 0.08);
+    const wander = (Math.sin(time * 0.37 + d.phase) + Math.sin(time * 0.61 + d.phase * 1.7)) * 0.04;
     const s = speed * d.sp * (1.1 - Math.min(0.35, Math.abs(1 - flow.f)));
     const dvx = flow.tx * s + flow.nx * (centre + wander);
     const dvz = flow.tz * s + flow.nz * (centre + wander);
@@ -1234,6 +1248,14 @@ function updateDucks(dt) {
     return v;
   };
   for (const d of floats) {
+    for (const { a, n } of region.edges) {
+      const sd = (d.x - a.x) * n.x + (d.z - a.y) * n.y;
+      if (sd < DUCK_R) {
+        d.x += n.x * (DUCK_R - sd); d.z += n.y * (DUCK_R - sd);
+        const vn = d.vx * n.x + d.vz * n.y;
+        if (vn < 0) { bump(d, -vn); d.rollV += vn * 4; d.vx -= 1.3 * vn * n.x; d.vz -= 1.3 * vn * n.y; }
+      }
+    }
     d.x = lim(d.x, W - DUCK_R, 'vx', d);
     d.z = lim(d.z, D - DUCK_R, 'vz', d);
     const ex = BX + DUCK_R, ez = BZ + DUCK_R;
@@ -1280,7 +1302,7 @@ function ropeStep(dt) {
   for (let i = 1; i < ROPE_N; i++) {
     const r = rope[i];
     if (i === ROPE_N - 1 && pinnedEnd) continue;
-    const vx = (r.p.x - r.o.x) * 0.992, vy = (r.p.y - r.o.y) * 0.992, vz = (r.p.z - r.o.z) * 0.992;
+    const vx = (r.p.x - r.o.x) * 0.985, vy = (r.p.y - r.o.y) * 0.985, vz = (r.p.z - r.o.z) * 0.985;
     r.o.copy(r.p);
     r.p.x += vx; r.p.y += vy + g; r.p.z += vz;
   }
@@ -1343,8 +1365,8 @@ function update(dt) {
   if (phase === 'idle' || phase === 'return') {
     if (!hasAimed) { // rustig rondzwaaien tot iemand iets doet
       const a = time * 0.25;
-      aim.x = Math.sin(a) * CX * 0.55; aim.z = CZ * (portrait ? 0 : 1) + Math.cos(a * 1.3) * 0.25;
-      if (portrait) { aim.x = CX * 0.95; aim.z = Math.sin(a) * CZ * 0.6; }
+      aim.x = region.c.x + Math.sin(a) * region.ex * 0.6;
+      aim.z = region.c.y + Math.cos(a * 1.3) * region.ez * 0.25 + region.ez * 0.35;
     }
     tipTarget.set(aim.x, TIP_Y, aim.z);
   } else if (phase === 'lift') {
@@ -1359,8 +1381,8 @@ function update(dt) {
 
   // --- vangen
   if (phase === 'idle') {
-    hoverDuck = findHover();
-    if (hoverDuck && time < catchUntil) hookDuck(hoverDuck);
+    const d = checkThread();
+    if (d) hookDuck(d);
   }
 
   // haakje in/uit het water
@@ -1427,7 +1449,7 @@ function update(dt) {
         setTimeout(() => addRipple(retTo.x, retTo.z, 0.025), 220);
         splash(retTo.x, 0.03, retTo.z, 16, 0.75);
         d.state = 'float'; d.x = retTo.x; d.z = retTo.z; d.vx = d.vz = 0; d.roll = 0; d.rollV = 2; d.pitchV = -2;
-        caught = null; phase = 'idle'; labelMesh.visible = false; catchUntil = -1;
+        caught = null; phase = 'idle'; labelMesh.visible = false;
       }
     }
     // druppelen
@@ -1478,7 +1500,8 @@ function update(dt) {
   ringIM.instanceColor.needsUpdate = true;
 
   // --- hengel, touw, haakje
-  const base = _v.set(0.9, 1.9, 3.2).applyQuaternion(toTankQ).add(tip);
+  const base = _v.copy(camLocal).sub(tip).multiplyScalar(0.42).add(tip)
+    .add(_v2.set(camDist * 0.2, -camDist * 0.06, 0).applyQuaternion(camera.quaternion).applyQuaternion(toTankQ));
   const rodDir = _v2.copy(tip).sub(base);
   const rodLen = rodDir.length();
   rod.position.copy(base).addScaledVector(rodDir, 0.5);
@@ -1520,7 +1543,6 @@ function frame(now) {
 // even laten inlopen zodat alles al rustig drijft
 for (let i = 0; i < 90; i++) update(1 / 60);
 requestAnimationFrame(frame);
-
 </script>
 </body>
 </html>
